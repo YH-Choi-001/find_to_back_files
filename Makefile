@@ -12,7 +12,7 @@ relative_path_list.txt: files_edited_after_timestamp.txt
 	sed "s/^\[.*\] *[[:digit:]]* //g" < "relative_path_list.txt" > "2b_zipped.txt"
 
 zip: 2b_zipped.txt
-	tar -czvf ~/Documents_edited_since_$(DATETIME).tar.gz -L 2b_zipped.txt
+	cd ~/Documents && tar -czvf ~/Documents_edited_since_$(DATETIME).tar.gz -T code/find_to_back_files/2b_zipped.txt
 
 clean:
 	rm "files_edited_after_timestamp.txt" || true
