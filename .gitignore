@@ -288,3 +288,6 @@ files_edited_after_timestamp.txt
 relative_path_list.txt
 zip_list.txt
 exclude_list.txt
+
+# My Records
+backup_records/
