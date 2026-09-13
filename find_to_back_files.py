@@ -118,6 +118,7 @@ for dirpath, dirnames, filenames in os.walk(root_dir, topdown=False):
     dir_all_match[dirpath] = all_match and has_items
 
 
+
 def find_git_repo_ancestor(path, stop_at):
     """
     Walk up from 'path' toward 'stop_at'. Return the first ancestor (or path
@@ -131,6 +132,24 @@ def find_git_repo_ancestor(path, stop_at):
             return None
         current = os.path.dirname(current)
 
+
+def dir_size(path):
+    """Return the total byte size of all files under 'path', skipping IGNORE_DIRS and .git."""
+    total = 0
+    for dirpath, dirnames, filenames in os.walk(path, topdown=True):
+        dirnames[:] = [d for d in dirnames if d not in IGNORE_DIRS and d != ".git"]
+        for f in filenames:
+            if f in IGNORE_FILES:
+                continue
+            try:
+                total += os.stat(os.path.join(dirpath, f)).st_size
+            except Exception:
+                pass
+    return total
+
+
+# Collect results before printing so we can right-align the size column
+results = []  # list of (tag, size_bytes, path)
 
 # Print results collapsing paths
 printed_dirs = set()       # directories printed as [d] whole-directory matches
@@ -152,7 +171,7 @@ for dirpath, dirnames, filenames in os.walk(root_dir, topdown=True):
         if dir_all_match.get(dirpath, False):
             local_only = git_has_local_only_changes(dirpath)
             tag = "gL" if local_only else "g"
-            print(f"[{tag}] {dirpath}")
+            results.append((tag, dir_size(dirpath), dirpath))
             printed_git_repos.add(dirpath)
         dirnames.clear()  # never descend into git repo internals
         continue
@@ -161,7 +180,7 @@ for dirpath, dirnames, filenames in os.walk(root_dir, topdown=True):
     if dir_all_match.get(dirpath, False):
         parent = os.path.dirname(dirpath)
         if not dir_all_match.get(parent, False):
-            print(f"[d] {dirpath}")
+            results.append(("d", dir_size(dirpath), dirpath))
         printed_dirs.add(dirpath)
     else:
         valid_files = [f for f in filenames if f not in IGNORE_FILES]
@@ -179,6 +198,11 @@ for dirpath, dirnames, filenames in os.walk(root_dir, topdown=True):
                     st = os.stat(fpath)
                     mtime = max(st.st_mtime, getattr(st, "st_birthtime", st.st_mtime))
                     if mtime > cutoff:
-                        print(f"[-] {fpath}")
+                        results.append(("-", st.st_size, fpath))
                 except Exception:
                     pass
+
+# Right-align the size column
+max_size_width = max((len(str(size)) for _, size, _ in results), default=1)
+for tag, size, path in results:
+    print(f"[{tag}] {size:{max_size_width}d} {path}")
