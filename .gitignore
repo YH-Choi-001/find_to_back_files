@@ -286,4 +286,5 @@ $RECYCLE.BIN/
 # Generated Files
 files_edited_after_timestamp.txt
 relative_path_list.txt
-2b_zipped.txt
+zip_list.txt
+exclude_list.txt
