@@ -9,7 +9,7 @@ relative_path_list.txt: files_edited_after_timestamp.txt
 	grep -v "^\\[g\\]" "files_edited_after_timestamp.txt" | sed "s|/Users/yhchoi/Documents|.|g" > "relative_path_list.txt"
 
 2b_zipped.txt: relative_path_list.txt
-	awk '{print $$3}' < "relative_path_list.txt" > "2b_zipped.txt"
+	sed "s/^\[.*\] *[[:digit:]]* //g" < "relative_path_list.txt" > "2b_zipped.txt"
 
 zip: 2b_zipped.txt
 	tar -czvf ~/Documents_edited_since_$(DATETIME).tar.gz -L 2b_zipped.txt
