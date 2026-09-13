@@ -202,7 +202,8 @@ for dirpath, dirnames, filenames in os.walk(root_dir, topdown=True):
                 except Exception:
                     pass
 
-# Right-align the size column
+# Sort results by path case-insensitively, then right-align the size column
+results.sort(key=lambda r: r[2].casefold())
 max_size_width = max((len(str(size)) for _, size, _ in results), default=1)
 for tag, size, path in results:
     print(f"[{tag}] {size:{max_size_width}d} {path}")
