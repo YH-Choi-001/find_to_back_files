@@ -1,9 +1,11 @@
-DATETIME?="2025-09-15 00:00:00"
+DATE:=2025-09-15
+TIME?=00:00:00
+DATETIME:=$(DATE) $(TIME)
 
 all: zip
 
 files_edited_after_timestamp.txt: find_to_back_files.py
-	python3 find_to_back_files.py --since $(DATETIME) > "files_edited_after_timestamp.txt"
+	python3 find_to_back_files.py --since "$(DATETIME)" > "files_edited_after_timestamp.txt"
 
 relative_path_list.txt: files_edited_after_timestamp.txt
 	sed "s|/Users/yhchoi/Documents|.|g" files_edited_after_timestamp.txt > "relative_path_list.txt"
@@ -15,7 +17,7 @@ exclude_list.txt: relative_path_list.txt
 	grep "^\\[g\\]" "relative_path_list.txt" | sed "s/^\[.*\] *[[:digit:]]* //g" > "exclude_list.txt"
 
 zip: zip_list.txt exclude_list.txt
-	cd ~/Documents && tar -czvf ~/Documents_edited_since_$(DATETIME).tar.gz -T "code/find_to_back_files/zip_list.txt" -X "code/find_to_back_files/exclude_list.txt"
+	cd ~/Documents && tar -czvf ~/Documents_edited_since_$(DATE)_$(TIME).tar.gz -T "code/find_to_back_files/zip_list.txt" -X "code/find_to_back_files/exclude_list.txt"
 
 clean:
 	rm "files_edited_after_timestamp.txt" || true
